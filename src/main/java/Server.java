@@ -6,20 +6,22 @@ public class Server {
     public static void main(String[] args) throws IOException {
         int port = 8080;
 
-        while (true) {
-            ServerSocket serverSocket = new ServerSocket(port);
-            Socket connection = serverSocket.accept();
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            int i = 0;
+            while (i <= 4) { //5 коннектов и сервер падает
+                Socket connection = serverSocket.accept();
 
-            PrintWriter out = new PrintWriter(connection.getOutputStream(), true);
-            BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
+                PrintWriter out = new PrintWriter(connection.getOutputStream(), true);
+                BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 
-            System.out.printf("New connection accepted. Port: %d%n", connection.getPort());
+                System.out.printf("New connection accepted. Port: %d%n", connection.getPort());
+                final String name = in.readLine();
+                out.println(String.format("Hi %s, your port is %d", name, connection.getPort()));
 
-            final String name = in.readLine();
-
-            out.println(String.format("Hi %s, your port is %d", name, connection.getPort()));
-
-            serverSocket.close();
+                i++;
+            }
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
         }
     }
 }
